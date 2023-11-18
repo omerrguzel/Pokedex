@@ -1,7 +1,8 @@
-package com.omerguzel.pokedex
+package com.omerguzel.pokedex.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.omerguzel.pokedex.R
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

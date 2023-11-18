@@ -11,4 +11,5 @@
     <string name="satk">SATK</string>
     <string name="sdef">SDEF</string>
     <string name="spd">SPD</string>
+    <string name="unknown_error">Unknown Error</string>
 </resources>
