@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="PokeText" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textSize">24sp</item>
+        <item name="fontFamily">@font/poppins_regular</item>
+        <item name="android:fontFamily">@font/poppins_regular</item>
+    </style>
+
+    <style name="PokeText.Body">
+        <item name="fontFamily">@font/poppins_regular</item>
+        <item name="android:fontFamily">@font/poppins_regular</item>
+    </style>
+
+    <style name="PokeText.Header">
+        <item name="fontFamily">@font/poppins_bold</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="PokeText.Body.Body1">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="PokeText.Body.Body2">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="PokeText.Body.Body3">
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <style name="PokeText.Body.Caption">
+        <item name="android:textSize">8sp</item>
+    </style>
+
+    <style name="PokeText.Header.Headline">
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="PokeText.Header.Subtitle1">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="PokeText.Header.Subtitle2">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="PokeText.Header.Subtitle3">
+        <item name="android:textSize">10sp</item>
+    </style>
+</resources>
