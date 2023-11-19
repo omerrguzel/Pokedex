@@ -1,8 +1,14 @@
 package com.omerguzel.pokedex.data.remote.network.response
 
+import com.google.gson.annotations.SerializedName
+
 data class Home(
-    val front_default: String? = null,
-    val front_female: Any? = null,
-    val front_shiny: String? = null,
-    val front_shiny_female: Any? = null
+    @SerializedName("front_default")
+    val frontDefault: String? = null,
+    @SerializedName("front_female")
+    val frontFemale: Any? = null,
+    @SerializedName("front_shiny")
+    val frontShiny: String? = null,
+    @SerializedName("front_shiny_female")
+    val frontShinyFemale: Any? = null
 )

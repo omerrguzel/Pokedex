@@ -1,7 +1,10 @@
 package com.omerguzel.pokedex.data.remote.network.response
 
+import com.google.gson.annotations.SerializedName
+
 data class Stat(
-    val base_stat: Int? = 0,
+    @SerializedName("base_stat")
+    val baseStat: Int? = 0,
     val effort: Int? = 0,
-    val stat: StatX? = StatX()
+    val stat: StatItem? = StatItem()
 )

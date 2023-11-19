@@ -1,6 +1,6 @@
 package com.omerguzel.pokedex.data.remote.network.response
 
-data class MoveLearnMethod(
+data class StatItem(
     val name: String? = null,
     val url: String? = null
 )
