@@ -1,10 +1,8 @@
 package com.omerguzel.pokedex.ui.search
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import com.omerguzel.pokedex.R
 import com.omerguzel.pokedex.databinding.FragmentSearchBinding
 import com.omerguzel.pokedex.ui.base.BaseFragment
@@ -18,8 +16,20 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
 
     private val viewModel by viewModels<SearchViewModel>()
 
+    private var currentSortOption :SortOption = SortOption.NUMBER
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-    }
 
+        binding.btnSort.setOnClickListener {
+            val sortDialogView = SortDialog(
+                requireContext(),
+                defaultOption = currentSortOption,
+                onSortOptionChanged = {
+                    currentSortOption = it
+                }
+            )
+            sortDialogView.showDialog()
+        }
+    }
 }

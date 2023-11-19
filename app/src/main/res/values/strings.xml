@@ -12,4 +12,8 @@
     <string name="sdef">SDEF</string>
     <string name="spd">SPD</string>
     <string name="unknown_error">Unknown Error</string>
+    <string name="pokedex">Pokédex</string>
+    <string name="sort_by">Sort by:</string>
+    <string name="number">Number</string>
+    <string name="name">Name</string>
 </resources>
