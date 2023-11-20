@@ -1,7 +1,11 @@
 package com.omerguzel.pokedex.ui.search
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
+import android.content.res.Resources
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import com.omerguzel.pokedex.R
 import com.omerguzel.pokedex.databinding.FragmentSearchBinding
@@ -46,11 +50,28 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
             }
         }
         binding.rvPokemon.addOnScrollListener(paginator)
+        observeUIState()
+    }
+
+    fun showLoading(isLoading: Boolean) {
+        with(binding.paginationProgressBar){
+            visibility = if (isLoading) View.VISIBLE else View.GONE
+            val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.loading_bar)
+            val screenWidth = Resources.getSystem().displayMetrics.widthPixels
+            drawable?.setBounds(0, 0, screenWidth * 2, height)
+            indeterminateDrawable = drawable
+
+            val anim = ObjectAnimator.ofFloat(this, "translationX", -screenWidth.toFloat(), screenWidth.toFloat())
+            anim.duration = 800
+            anim.repeatMode = ValueAnimator.REVERSE
+            anim.repeatCount = ValueAnimator.INFINITE
+            anim.start()
+        }
+
     }
 
     private fun observePokemonList() {
         viewModel.pokemonDetailsState.collectLatestEvent(this@SearchFragment) { state ->
-            //Handle Loading
             when (state) {
                 is AggregatedResource.Error -> TODO()
                 is AggregatedResource.PartialSuccess -> TODO()
@@ -59,6 +80,15 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
                         adapter.submitData(it)
                     }
                 }
+                AggregatedResource.Loading -> TODO()
+            }
+        }
+    }
+
+    private fun observeUIState(){
+        viewModel.uiState.collectLatestEvent(this@SearchFragment){state->
+            with(binding){
+                showLoading(state.isPagingLoadingVisible)
             }
         }
     }

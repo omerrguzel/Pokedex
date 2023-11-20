@@ -7,6 +7,7 @@ import com.omerguzel.pokedex.domain.usecase.FetchPokemonDetailsUseCase
 import com.omerguzel.pokedex.domain.usecase.FetchPokemonListUseCase
 import com.omerguzel.pokedex.ui.base.BaseViewModel
 import com.omerguzel.pokedex.ui.search.model.SearchUIEvents
+import com.omerguzel.pokedex.ui.search.model.SearchUIStates
 import com.omerguzel.pokedex.util.AggregatedResource
 import com.omerguzel.pokedex.util.Event
 import com.omerguzel.pokedex.util.Resource
@@ -27,6 +28,9 @@ class SearchViewModel @Inject constructor(
     private var isLastPage = AtomicBoolean(false)
     private var offset = 0
 
+    private val _uiState = MutableStateFlow(Event(SearchUIStates()))
+    val uiState = _uiState.asStateFlow()
+
     private val _pokemonListState =
         MutableStateFlow<Event<Resource<PokemonList?>?>>(Event(null))
 
@@ -41,6 +45,7 @@ class SearchViewModel @Inject constructor(
 
     private fun fetchPokemonList(limit: Int, offset: Int) {
         viewModelScope.launch {
+            _uiState.emit(Event(SearchUIStates(isPagingLoadingVisible = true)))
             fetchPokemonListUseCase(limit, offset).collect { resource ->
                 _pokemonListState.emit(Event(resource))
                 when (resource) {
@@ -48,13 +53,14 @@ class SearchViewModel @Inject constructor(
                         isLoadingMore.set(false)
                         isLastPage.set(false)
                     }
+
                     is Resource.Loading -> Unit
                     is Resource.Success -> {
                         resource.data?.let {
                             fetchPokemonDetails(it)
                         }
                         resource.data?.results?.let {
-                            if(it.isEmpty() || it.size<limit) isLastPage.set(true)
+                            if (it.isEmpty() || it.size < limit) isLastPage.set(true)
                         }
                         isLoadingMore.set(false)
                     }
@@ -67,13 +73,18 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             val result = fetchPokemonDetailsUseCase(pokemonList)
             _pokemonDetailsState.emit(Event(result))
+            if(result != AggregatedResource.Loading) {
+                _uiState.emit(Event(SearchUIStates(isPagingLoadingVisible = false)))
+            }
         }
     }
 
     fun handleUIEvents(event: SearchUIEvents<Any>) {
         viewModelScope.launch {
             when (event) {
-                SearchUIEvents.OnLoadMore -> loadMore()
+                SearchUIEvents.OnLoadMore -> {
+                    loadMore()
+                }
             }
         }
     }
@@ -81,6 +92,6 @@ class SearchViewModel @Inject constructor(
     private fun loadMore() {
         if (isLoadingMore.getAndSet(true) || isLastPage.get()) return
         offset += 9
-        fetchPokemonList(18,offset)
+        fetchPokemonList(18, offset)
     }
 }

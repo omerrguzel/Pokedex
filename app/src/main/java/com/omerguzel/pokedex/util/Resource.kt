@@ -14,5 +14,7 @@ sealed class AggregatedResource<out T> {
     data class Success<T>(val data: T) : AggregatedResource<T>()
     data class PartialSuccess<T>(val data: T, val partialErrors: List<ServiceError>) : AggregatedResource<T>()
     data class Error(val message: String) : AggregatedResource<Nothing>()
+    object Loading : AggregatedResource<Nothing>()
+
 }
 
