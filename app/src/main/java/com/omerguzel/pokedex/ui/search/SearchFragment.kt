@@ -21,6 +21,8 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel.fetchPokemonList(20,0)
+
         binding.btnSort.setOnClickListener {
             val sortDialogView = SortDialog(
                 requireContext(),

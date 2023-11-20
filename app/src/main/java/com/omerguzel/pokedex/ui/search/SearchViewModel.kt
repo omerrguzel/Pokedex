@@ -15,10 +15,11 @@ class SearchViewModel @Inject constructor(
 ) : BaseViewModel() {
 
     init {
+        Log.d("mylog","viewmodel init")
         fetchPokemonList(20,0)
     }
 
-    private fun fetchPokemonList(
+    fun fetchPokemonList(
         limit:Int,
         offset:Int
     ){
@@ -27,9 +28,26 @@ class SearchViewModel @Inject constructor(
             when(result){
                 is NetworkResult.Failure -> TODO()
                 is NetworkResult.Success -> {
-                    result.response?.let {
-                        val firstItem = it.results?.get(0)
+                    result.response?.let { pokemonList->
+                        val firstItem = pokemonList.results?.get(0)
                         Log.d("mylog","${firstItem?.name}")
+                        firstItem?.url?.let {
+                            fetchPokemonInfo(it)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun fetchPokemonInfo(url:String){
+        viewModelScope.launch {
+            val pokemon = pokemonRepository.fetchPokemonInfo(url)
+            when(pokemon){
+                is NetworkResult.Failure -> TODO()
+                is NetworkResult.Success -> {
+                    pokemon.response?.sprites?.other?.officialArtwork?.frontDefault?.let {
+                        Log.d("mylog","Url of image $it")
                     }
                 }
             }
