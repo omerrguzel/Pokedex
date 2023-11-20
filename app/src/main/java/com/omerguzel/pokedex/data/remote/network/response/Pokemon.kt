@@ -13,6 +13,7 @@ data class Pokemon(
     val moves: List<Move>? = listOf(),
     val name: String? = "",
     val order: Int? = 0,
+    val species : SpeciesItem? =null,
     val sprites: Sprites? = Sprites(),
     val stats: List<Stat>? = listOf(),
     val types: List<Type>? = listOf(),

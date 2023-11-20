@@ -1,22 +1,18 @@
 package com.omerguzel.pokedex.util
 
-data class Resource<out T>(val status: Status, val data: T?, val message: String?) {
+import com.omerguzel.pokedex.data.remote.network.common.ServiceError
 
-    companion object {
-        fun <T> success(data: T?): Resource<T> {
-            return Resource(Status.SUCCESS, data, null)
-        }
-        fun <T> error(msg: String, data: T?): Resource<T> {
-            return Resource(Status.ERROR, data, msg)
-        }
-        fun <T> loading(data: T?): Resource<T> {
-            return Resource(Status.LOADING, data, null)
-        }
-    }
+sealed class Resource<out T> {
+    data class Success<T>(val data: T) : Resource<T>()
+    data class Error(
+        val message: String
+    ) : Resource<Nothing>()
+    object Loading : Resource<Nothing>()
 }
 
-enum class Status {
-    SUCCESS,
-    ERROR,
-    LOADING
+sealed class AggregatedResource<out T> {
+    data class Success<T>(val data: T) : AggregatedResource<T>()
+    data class PartialSuccess<T>(val data: T, val partialErrors: List<ServiceError>) : AggregatedResource<T>()
+    data class Error(val message: String) : AggregatedResource<Nothing>()
 }
+

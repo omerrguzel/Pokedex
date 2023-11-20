@@ -26,25 +26,14 @@ sealed class ServiceError(
     ) : ServiceError(message, code)
 
     companion object {
-        fun fromException(t: Throwable): ServiceError = when (t) {
-            is UnknownHostException, is ConnectException, is SocketException -> Default(BaseServiceError.CONNECTION)
-            is TimeoutException, is SocketTimeoutException -> Default(BaseServiceError.TIMEOUT)
-            is JsonSyntaxException -> Default(BaseServiceError.CORRUPTED_DATA)
-            else -> Default(BaseServiceError.UNKNOWN)
-        }
-
-        fun <T> fromResponse(response: Response<T>): ServiceError {
-            return if (response.isSuccessful) {
-                Default(BaseServiceError.CORRUPTED_DATA)
-            } else {
-                val errorMessage = response.errorBody()?.string()
-                val reason = when (response.code()) {
-                    HttpURLConnection.HTTP_UNAUTHORIZED -> BaseServiceError.UNAUTHORIZED
-                    HttpURLConnection.HTTP_PRECON_FAILED -> BaseServiceError.PRECONDITION_FAILED
-                    else -> BaseServiceError.CORRUPTED_DATA
-                }
-                Default(reason, errorMessage)
+        fun fromException(t: Throwable): ServiceError {
+            return when (t) {
+                is UnknownHostException, is ConnectException, is SocketException -> Default(BaseServiceError.CONNECTION, message = t.message)
+                is TimeoutException, is SocketTimeoutException -> Default(BaseServiceError.TIMEOUT, message = t.message)
+                is JsonSyntaxException -> Default(BaseServiceError.CORRUPTED_DATA, message = t.message)
+                else -> Default(BaseServiceError.UNKNOWN, message = t.message)
             }
         }
     }
 }
+

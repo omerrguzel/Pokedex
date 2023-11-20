@@ -12,13 +12,23 @@ import retrofit2.Retrofit
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
-@Keep
 sealed class NetworkResult<out T> {
     data class Success<T>(val response: T?, val headers: Headers? = null) : NetworkResult<T>()
     data class Failure<T>(val error: ServiceError, val response: T?) : NetworkResult<T>()
 }
 
-@Keep
+class CompositeException(private val serviceErrors: List<ServiceError>) : Throwable() {
+    fun deduceRepresentativeError(): ServiceError {
+        val distinctCodes = serviceErrors.mapNotNull { it.code }.distinct()
+        return if (distinctCodes.size == 1) {
+            serviceErrors.first()
+        } else {
+            ServiceError.Default(BaseServiceError.UNKNOWN, "Multiple errors occurred")
+        }
+    }
+}
+
+
 abstract class CallDelegate<TIn, TOut>(
     protected val proxy: Call<TIn>
 ) : Call<TOut> {
@@ -35,7 +45,6 @@ abstract class CallDelegate<TIn, TOut>(
     abstract fun cloneImpl(): Call<TOut>
 }
 
-@Keep
 class NetworkResultCall<T>(proxy: Call<T>) :
     CallDelegate<T, NetworkResult<T>>(proxy) {
     override fun enqueueImpl(callback: Callback<NetworkResult<T>>) =
@@ -43,11 +52,7 @@ class NetworkResultCall<T>(proxy: Call<T>) :
             override fun onResponse(call: Call<T>, response: Response<T>) {
                 val body = response.body()
                 val headers = response.headers()
-                val result = if (response.isSuccessful) {
-                    NetworkResult.Success(body, headers)
-                } else {
-                    NetworkResult.Failure(ServiceError.fromResponse(response), body)
-                }
+                val result = NetworkResult.Success(body, headers)
                 callback.onResponse(this@NetworkResultCall, Response.success(result))
             }
 
@@ -61,7 +66,6 @@ class NetworkResultCall<T>(proxy: Call<T>) :
     override fun timeout(): Timeout = proxy.timeout()
 }
 
-@Keep
 class NetworkResultAdapter(
     private val type: Type
 ) : CallAdapter<Type, Call<NetworkResult<Type>>> {
@@ -70,7 +74,6 @@ class NetworkResultAdapter(
         NetworkResultCall(call)
 }
 
-@Keep
 class NetworkCallAdapterFactory : CallAdapter.Factory() {
     override fun get(
         returnType: Type,
@@ -92,7 +95,6 @@ class NetworkCallAdapterFactory : CallAdapter.Factory() {
                 }
             }
         }
-
         else -> null
     }
 }

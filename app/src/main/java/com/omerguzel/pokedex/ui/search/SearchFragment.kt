@@ -1,11 +1,15 @@
 package com.omerguzel.pokedex.ui.search
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
 import com.omerguzel.pokedex.R
 import com.omerguzel.pokedex.databinding.FragmentSearchBinding
 import com.omerguzel.pokedex.ui.base.BaseFragment
+import com.omerguzel.pokedex.util.AggregatedResource
+import com.omerguzel.pokedex.util.collectLatest
+import com.omerguzel.pokedex.util.collectLatestEvent
 import dagger.hilt.android.AndroidEntryPoint
 import tr.com.allianz.digitall.extensions.viewbinding.viewBinding
 
@@ -21,8 +25,6 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.fetchPokemonList(20,0)
-
         binding.btnSort.setOnClickListener {
             val sortDialogView = SortDialog(
                 requireContext(),
@@ -32,6 +34,22 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
                 }
             )
             sortDialogView.showDialog()
+        }
+        observePokemonList()
+    }
+
+    private fun observePokemonList(){
+        viewModel.pokemonDetailsState.collectLatestEvent(this@SearchFragment){state->
+            //Handle Loading
+            when(state){
+                is AggregatedResource.Error -> TODO()
+                is AggregatedResource.PartialSuccess -> TODO()
+                is AggregatedResource.Success -> {
+                    state.data.results?.forEach{
+                        Log.d("mylog","name ${it?.image}")
+                    }
+                }
+            }
         }
     }
 }
