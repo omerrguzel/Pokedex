@@ -16,6 +16,7 @@ import com.omerguzel.pokedex.extensions.formatWeight
 import com.omerguzel.pokedex.extensions.replaceSpecialCharactersWithSpace
 import com.omerguzel.pokedex.extensions.showImage
 import com.omerguzel.pokedex.ui.base.BaseFragment
+import com.omerguzel.pokedex.ui.base.StatusBarColorChanger
 import com.omerguzel.pokedex.util.Resource
 import com.omerguzel.pokedex.util.collectLatestEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,6 +33,9 @@ class DetailFragment : BaseFragment(R.layout.fragment_detail) {
 
     private val typeAdapter: TypeAdapter = TypeAdapter()
     private val statAdapter: StatAdapter = StatAdapter()
+
+    private val statusBarColorChanger : StatusBarColorChanger
+        get()= requireActivity() as StatusBarColorChanger
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -64,6 +68,7 @@ class DetailFragment : BaseFragment(R.layout.fragment_detail) {
         with(binding) {
             val pokemonType = pokemonUIItem.types?.get(0)?.let { PokemonType.fromString(it) }
             val colorRes = pokemonType?.colorRes ?: R.color.wireframe_grayscale
+            statusBarColorChanger.changeStatusBarColor(colorRes)
             root.setBackgroundColor(requireContext().color(colorRes))
             textAbout.setTextColor(requireContext().color(colorRes))
             textBaseStats.setTextColor(requireContext().color(colorRes))

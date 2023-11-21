@@ -11,6 +11,7 @@ import com.omerguzel.pokedex.R
 import com.omerguzel.pokedex.databinding.FragmentSearchBinding
 import com.omerguzel.pokedex.domain.model.PokemonUIItem
 import com.omerguzel.pokedex.ui.base.BaseFragment
+import com.omerguzel.pokedex.ui.base.StatusBarColorChanger
 import com.omerguzel.pokedex.ui.search.model.SearchUIEvents
 import com.omerguzel.pokedex.util.AggregatedResource
 import com.omerguzel.pokedex.util.collectLatestEvent
@@ -29,8 +30,13 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
 
     private val adapter: PokemonAdapter = PokemonAdapter()
 
+    private val statusBarColorChanger : StatusBarColorChanger
+        get()= requireActivity() as StatusBarColorChanger
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        statusBarColorChanger.changeStatusBarColor(R.color.primary)
 
         binding.rvPokemon.adapter = adapter
         adapter.itemSelectListener={
