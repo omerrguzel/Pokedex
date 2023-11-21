@@ -12,12 +12,13 @@ class PokemonMapper @Inject constructor() {
         return PokemonUIItem(
             id = pokemon.id,
             name = pokemon.name,
-            abilities = pokemon.abilities?.mapNotNull { it.ability?.name } ?: listOf(),
+            abilities = pokemon.abilities?.map { it.ability?.name } ?: listOf(),
             weight = pokemon.weight,
             height = pokemon.height,
             image = pokemon.sprites?.other?.officialArtwork?.frontDefault,
             stats = pokemon.stats?.map { stat -> Pair(stat.stat?.name, stat.baseStat) },
-            speciesUrl = pokemon.species?.url
+            speciesUrl = pokemon.species?.url,
+            types = pokemon.types?.map { it.type?.name } ?: listOf()
         )
     }
 

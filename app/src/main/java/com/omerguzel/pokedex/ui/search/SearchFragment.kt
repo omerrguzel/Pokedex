@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import com.omerguzel.pokedex.R
 import com.omerguzel.pokedex.databinding.FragmentSearchBinding
+import com.omerguzel.pokedex.domain.model.PokemonUIItem
 import com.omerguzel.pokedex.ui.base.BaseFragment
 import com.omerguzel.pokedex.ui.search.model.SearchUIEvents
 import com.omerguzel.pokedex.util.AggregatedResource
@@ -32,6 +33,9 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.rvPokemon.adapter = adapter
+        adapter.itemSelectListener={
+            navToDetail(it)
+        }
         binding.btnSort.setOnClickListener {
             val sortDialogView = SortDialog(
                 requireContext(),
@@ -53,7 +57,7 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
         observeUIState()
     }
 
-    fun showLoading(isLoading: Boolean) {
+    private fun showLoading(isLoading: Boolean) {
         with(binding.paginationProgressBar){
             visibility = if (isLoading) View.VISIBLE else View.GONE
             val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.loading_bar)
@@ -91,5 +95,9 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
                 showLoading(state.isPagingLoadingVisible)
             }
         }
+    }
+
+    private fun navToDetail(pokemonUIItem: PokemonUIItem){
+        nav(SearchFragmentDirections.actionSearchFragmentToDetailFragment(pokemonUIItem))
     }
 }

@@ -5,11 +5,15 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.omerguzel.pokedex.R
 import com.omerguzel.pokedex.databinding.ItemPokemonBinding
 import com.omerguzel.pokedex.domain.model.PokemonUIItem
+import com.omerguzel.pokedex.extensions.capitalizeFirstLetter
 import com.omerguzel.pokedex.extensions.showImage
 
-class PokemonAdapter : ListAdapter<PokemonUIItem, PokemonAdapter.PokemonViewHolder>(DIFF_CALLBACK) {
+class PokemonAdapter(
+    var itemSelectListener: ((pokemonUIItem: PokemonUIItem) -> Unit)? = null,
+    ) : ListAdapter<PokemonUIItem, PokemonAdapter.PokemonViewHolder>(DIFF_CALLBACK) {
 
     private var pokemonList = mutableListOf<PokemonUIItem>()
 
@@ -60,11 +64,13 @@ class PokemonAdapter : ListAdapter<PokemonUIItem, PokemonAdapter.PokemonViewHold
 
         fun bind(pokemon: PokemonUIItem) {
             with(binding){
-                textId.text= "#"+pokemon.id.toString()
-                textName.text=pokemon.name
+                textId.text= itemView.rootView.context.getString(R.string.pokemon_id,pokemon.id.toString())
+                textName.text=pokemon.name.capitalizeFirstLetter()
                 image.showImage(pokemon.image)
+                root.setOnClickListener{
+                    itemSelectListener?.invoke(pokemon)
+                }
             }
         }
     }
-
 }

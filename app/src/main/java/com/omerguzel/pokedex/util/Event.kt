@@ -1,6 +1,5 @@
 package com.omerguzel.pokedex.util
 
-import android.annotation.SuppressLint
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -24,7 +23,6 @@ class Event<out T>(private val content: T, private val singleCall: Boolean = fal
     fun peekContent(): T = content
 }
 
-@SuppressLint("RepeatOnLifecycleWrongUsage")
 internal fun <T> Flow<Event<T?>>.collectLatestEvent(
     lifecycleOwner: LifecycleOwner,
     collect: suspend (T) -> Unit

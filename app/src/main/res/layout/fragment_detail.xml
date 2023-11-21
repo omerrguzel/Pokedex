@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grass"
+    android:padding="4dp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imagePokeball"
+        android:layout_width="208dp"
+        android:layout_height="208dp"
+        android:src="@drawable/ic_pokeball"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white_pokeball" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/btnBack"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/ic_arrow_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textTitle"
+        style="@style/PokeText.Header.Headline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@id/btnBack"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
+        app:layout_constraintTop_toTopOf="@id/btnBack"
+        tools:text="Bulbasaur" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/textId"
+        style="@style/PokeText.Header.Subtitle2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintBottom_toBottomOf="@id/textTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/textTitle"
+        tools:text="#001" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imagePokeball"
+        app:strokeWidth="0dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="20dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="56dp"
+                android:orientation="horizontal"
+                android:overScrollMode="never"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_type" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textAbout"
+                style="@style/PokeText.Header.Subtitle1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/about"
+                android:textColor="@color/grass"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/rvType" />
+
+            <include
+                android:id="@+id/viewWeight"
+                layout="@layout/view_physical_traits"
+                android:layout_width="104dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toStartOf="@id/viewHeight"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textAbout" />
+
+            <include
+                android:id="@+id/viewHeight"
+                layout="@layout/view_physical_traits"
+                android:layout_width="104dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toStartOf="@id/viewAbilities"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toEndOf="@id/viewWeight"
+                app:layout_constraintTop_toBottomOf="@id/textAbout" />
+
+            <include
+                android:id="@+id/viewAbilities"
+                layout="@layout/view_abilities"
+                android:layout_width="104dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toEndOf="@id/viewHeight"
+                app:layout_constraintTop_toBottomOf="@id/textAbout" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textDescription"
+                style="@style/PokeText.Body.Body3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="28dp"
+                android:textColor="@color/dark_grayscale"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/viewWeight"
+                tools:text="There is a plant seed on its back right from the day this Pokémon is born. The seed slowly grows larger." />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textBaseStats"
+                style="@style/PokeText.Header.Subtitle1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/base_stats"
+                android:textColor="@color/grass"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textDescription" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvStats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                android:overScrollMode="never"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textBaseStats"
+                tools:listitem="@layout/item_base_stats" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </com.google.android.material.card.MaterialCardView>
+
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imagePokemon"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textTitle"
+        tools:src="@drawable/example_pokemon" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
