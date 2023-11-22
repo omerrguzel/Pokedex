@@ -31,4 +31,15 @@ class PokemonMapper @Inject constructor() {
             results = pokemonUIItems
         )
     }
+
+
+    fun mapToSimplePokemonUIList(pokemonDetails: List<Pokemon>): PokemonUIList {
+        val pokemonUIItems = pokemonDetails.map { mapToPokemonUIItem(it) }
+        return PokemonUIList(
+            count = null,
+            next = null,
+            previous = null,
+            results = pokemonUIItems
+        )
+    }
 }

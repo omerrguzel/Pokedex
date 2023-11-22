@@ -1,22 +1,23 @@
 package com.omerguzel.pokedex.ui.search
 
-import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
-import android.content.res.Resources
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.omerguzel.pokedex.R
 import com.omerguzel.pokedex.databinding.FragmentSearchBinding
 import com.omerguzel.pokedex.domain.model.PokemonUIItem
-import com.omerguzel.pokedex.extensions.drawable
+import com.omerguzel.pokedex.extensions.initPagingLoadingBar
 import com.omerguzel.pokedex.extensions.visibleOrGone
 import com.omerguzel.pokedex.ui.base.BaseFragment
 import com.omerguzel.pokedex.ui.base.StatusBarColorChanger
+import com.omerguzel.pokedex.ui.search.model.PokemonListUIState
 import com.omerguzel.pokedex.ui.search.model.SearchUIEvents
-import com.omerguzel.pokedex.util.AggregatedResource
 import com.omerguzel.pokedex.util.collectLatestEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import tr.com.allianz.digitall.extensions.viewbinding.viewBinding
 import tr.com.allianz.digitall.util.list.RecyclerViewPaginator
 
@@ -29,20 +30,30 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
 
     private var currentSortOption: SortOption = SortOption.NUMBER
 
-    private val adapter: PokemonAdapter = PokemonAdapter()
+    private val defaultAdapter: PokemonAdapter = PokemonAdapter()
+    private val searchAdapter: PokemonAdapter = PokemonAdapter()
 
-    private val statusBarColorChanger : StatusBarColorChanger
-        get()= requireActivity() as StatusBarColorChanger
+    private var isInSearchMode: Boolean = false
+
+    private val statusBarColorChanger: StatusBarColorChanger
+        get() = requireActivity() as StatusBarColorChanger
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initUI()
+        initListeners()
+        observePokemonList()
+        observeUIState()
+    }
 
+    private fun initUI(){
+        binding.paginationProgressBar.initPagingLoadingBar(requireContext())
         statusBarColorChanger.changeStatusBarColor(R.color.primary)
+        initSearch()
+        initRVs()
+    }
 
-        binding.rvPokemon.adapter = adapter
-        adapter.itemSelectListener={
-            navToDetail(it)
-        }
+    private fun initListeners(){
         binding.btnSort.setOnClickListener {
             val sortDialogView = SortDialog(
                 requireContext(),
@@ -53,58 +64,86 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
             )
             sortDialogView.showDialog()
         }
-        observePokemonList()
 
-        val paginator = object : RecyclerViewPaginator(binding.rvPokemon) {
-            override fun loadMore(start: Int, count: Int) {
-                viewModel.handleUIEvents(SearchUIEvents.OnLoadMore)
-            }
+        defaultAdapter.itemSelectListener = {
+            navToDetail(it)
         }
-        binding.rvPokemon.addOnScrollListener(paginator)
-        observeUIState()
+        searchAdapter.itemSelectListener = {
+            navToDetail(it)
+        }
     }
 
-    private fun showLoading(isLoading: Boolean) {
-        with(binding.paginationProgressBar){
-           visibleOrGone(isLoading)
-            val drawable = requireContext().drawable(R.drawable.loading_bar)
-            val screenWidth = Resources.getSystem().displayMetrics.widthPixels
-            drawable?.setBounds(0, 0, screenWidth * 2, height)
-            indeterminateDrawable = drawable
+    private fun initRVs(){
+        with(binding){
+            rvPokemon.adapter = defaultAdapter
+            rvSearchPokemon.adapter = searchAdapter
+            rvPokemon.visibleOrGone(isInSearchMode.not())
+            rvSearchPokemon.visibleOrGone(isInSearchMode)
 
-            val anim = ObjectAnimator.ofFloat(this, "translationX", -screenWidth.toFloat(), screenWidth.toFloat())
-            anim.duration = 800
-            anim.repeatMode = ValueAnimator.REVERSE
-            anim.repeatCount = ValueAnimator.INFINITE
-            anim.start()
+            val paginator = object : RecyclerViewPaginator(binding.rvPokemon) {
+                override fun loadMore(start: Int, count: Int) {
+                    viewModel.handleUIEvents(SearchUIEvents.OnLoadMore)
+                }
+            }
+            rvPokemon.addOnScrollListener(paginator)
         }
-
     }
 
     private fun observePokemonList() {
         viewModel.pokemonDetailsState.collectLatestEvent(this@SearchFragment) { state ->
             when (state) {
-                is AggregatedResource.Error -> TODO()
-                is AggregatedResource.PartialSuccess -> TODO()
-                is AggregatedResource.Success -> {
+                is PokemonListUIState.Error -> {
+                    //TODO
+                }
+
+                is PokemonListUIState.Loading -> Unit
+                is PokemonListUIState.Success -> {
                     state.data.results?.let {
-                        adapter.submitData(it)
+                        if(isInSearchMode.not()) {
+                            defaultAdapter.submitData(it)
+                        }
+                        else searchAdapter.submitList(it)
                     }
                 }
-                AggregatedResource.Loading -> TODO()
             }
         }
     }
 
-    private fun observeUIState(){
-        viewModel.uiState.collectLatestEvent(this@SearchFragment){state->
-            with(binding){
-                showLoading(state.isPagingLoadingVisible)
+    private fun observeUIState() {
+        viewModel.uiState.collectLatestEvent(this@SearchFragment) { state ->
+            with(binding) {
+                paginationProgressBar.visibleOrGone(state.isPagingLoadingVisible)
+                isInSearchMode = state.isInSearchMode
+                rvPokemon.visibleOrGone(isInSearchMode.not())
+                rvSearchPokemon.visibleOrGone(isInSearchMode)
             }
         }
     }
 
-    private fun navToDetail(pokemonUIItem: PokemonUIItem){
+    private fun initSearch() {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                handleQueryText(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                handleQueryText(newText)
+                return true
+            }
+        })
+    }
+
+    private fun handleQueryText(query: String?) {
+        query?.let {
+            lifecycleScope.launch {
+                delay(500)
+            }
+            viewModel.handleUIEvents(SearchUIEvents.OnSearchQuerySubmitted(query))
+        }
+    }
+
+    private fun navToDetail(pokemonUIItem: PokemonUIItem) {
         nav(SearchFragmentDirections.actionSearchFragmentToDetailFragment(pokemonUIItem))
     }
 }

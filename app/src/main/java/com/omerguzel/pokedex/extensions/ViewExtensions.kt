@@ -1,6 +1,8 @@
 package com.omerguzel.pokedex.extensions
 
+import android.content.Context
 import android.view.View
+import android.widget.ProgressBar
 
 fun View.visible() {
     if (visibility != View.VISIBLE) {
@@ -37,3 +39,22 @@ fun View.visibleOrGone(show: Boolean) {
         gone()
     }
 }
+
+fun ProgressBar.initPagingLoadingBar(context: Context) {
+    val drawable = context.drawable(com.omerguzel.pokedex.R.drawable.loading_bar)
+    val screenWidth = android.content.res.Resources.getSystem().displayMetrics.widthPixels
+    drawable?.setBounds(0, 0, screenWidth * 2, height)
+    indeterminateDrawable = drawable
+
+    val anim = android.animation.ObjectAnimator.ofFloat(
+        this,
+        "translationX",
+        -screenWidth.toFloat(),
+        screenWidth.toFloat()
+    )
+    anim.duration = 800
+    anim.repeatMode = android.animation.ValueAnimator.REVERSE
+    anim.repeatCount = android.animation.ValueAnimator.INFINITE
+    anim.start()
+}
+

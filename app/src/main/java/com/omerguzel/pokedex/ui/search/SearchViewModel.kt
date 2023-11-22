@@ -1,11 +1,12 @@
 package com.omerguzel.pokedex.ui.search
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.omerguzel.pokedex.data.remote.network.response.PokemonList
-import com.omerguzel.pokedex.domain.model.PokemonUIList
 import com.omerguzel.pokedex.domain.usecase.FetchPokemonDetailsUseCase
 import com.omerguzel.pokedex.domain.usecase.FetchPokemonListUseCase
 import com.omerguzel.pokedex.ui.base.BaseViewModel
+import com.omerguzel.pokedex.ui.search.model.PokemonListUIState
 import com.omerguzel.pokedex.ui.search.model.SearchUIEvents
 import com.omerguzel.pokedex.ui.search.model.SearchUIStates
 import com.omerguzel.pokedex.util.AggregatedResource
@@ -27,6 +28,8 @@ class SearchViewModel @Inject constructor(
     private var isLoadingMore = AtomicBoolean(false)
     private var isLastPage = AtomicBoolean(false)
     private var offset = 0
+    private var isSearchMode: Boolean = false
+    private var lastSearchedQuery = ""
 
     private val _uiState = MutableStateFlow(Event(SearchUIStates()))
     val uiState = _uiState.asStateFlow()
@@ -34,10 +37,13 @@ class SearchViewModel @Inject constructor(
     private val _pokemonListState =
         MutableStateFlow<Event<Resource<PokemonList?>?>>(Event(null))
 
-    private val _pokemonDetailsState =
-        MutableStateFlow<Event<AggregatedResource<PokemonUIList>?>>(Event(null))
-    val pokemonDetailsState = _pokemonDetailsState.asStateFlow()
 
+    private val _pokemonSearchListState =
+        MutableStateFlow<Event<Resource<PokemonList?>?>>(Event(null))
+
+
+    private val _pokemonDetailsState = MutableStateFlow<Event<PokemonListUIState?>>(Event(null))
+    val pokemonDetailsState = _pokemonDetailsState.asStateFlow()
 
     init {
         fetchPokemonList(18, 0)
@@ -69,15 +75,95 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun fetchPokemonDetails(pokemonList: PokemonList) {
+    private fun fetchAllPokemonList(filterQuery: String) {
         viewModelScope.launch {
-            val result = fetchPokemonDetailsUseCase(pokemonList)
-            _pokemonDetailsState.emit(Event(result))
-            if(result != AggregatedResource.Loading) {
-                _uiState.emit(Event(SearchUIStates(isPagingLoadingVisible = false)))
+            fetchPokemonListUseCase(10000, 0).collect { resource ->
+                _pokemonSearchListState.emit(Event(resource))
+                when (resource) {
+                    is Resource.Error -> {
+                        //TODO
+                    }
+
+                    is Resource.Loading -> Unit
+                    is Resource.Success -> {
+                        resource.data?.let {
+                            fetchPokemonDetails(it, filterQuery)
+                        }
+                    }
+                }
             }
         }
     }
+
+    private fun fetchPokemonDetails(pokemonList: PokemonList, filterQuery: String? = null) {
+        viewModelScope.launch {
+            fetchPokemonDetailsUseCase(pokemonList, filterQuery).collect { aggregatedResource ->
+                when (aggregatedResource) {
+                    is AggregatedResource.Loading -> {
+                        _uiState.emit(
+                            Event(
+                                SearchUIStates(
+                                    isPagingLoadingVisible = true,
+                                    isInSearchMode = isSearchMode
+                                )
+                            )
+                        )
+                        _pokemonDetailsState.emit(Event(PokemonListUIState.Loading))
+                    }
+
+                    is AggregatedResource.Error -> {
+                        _uiState.emit(
+                            Event(
+                                SearchUIStates(
+                                    isPagingLoadingVisible = false,
+                                    isInSearchMode = isSearchMode
+                                )
+                            )
+                        )
+                        _pokemonDetailsState.emit(Event(PokemonListUIState.Error(aggregatedResource.message)))
+                    }
+
+                    is AggregatedResource.Success -> {
+                        _uiState.emit(
+                            Event(
+                                SearchUIStates(
+                                    isPagingLoadingVisible = false,
+                                    isInSearchMode = isSearchMode
+                                )
+                            )
+                        )
+                        _pokemonDetailsState.emit(
+                            Event(
+                                PokemonListUIState.Success(
+                                    aggregatedResource.data
+                                )
+                            )
+                        )
+                        Log.d("mylog", "${aggregatedResource.data.results}")
+                    }
+
+                    is AggregatedResource.PartialSuccess -> {
+                        _uiState.emit(
+                            Event(
+                                SearchUIStates(
+                                    isPagingLoadingVisible = false,
+                                    isInSearchMode = isSearchMode
+                                )
+                            )
+                        )
+                        _pokemonDetailsState.emit(
+                            Event(
+                                PokemonListUIState.Success(
+                                    aggregatedResource.data
+                                )
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
 
     fun handleUIEvents(event: SearchUIEvents<Any>) {
         viewModelScope.launch {
@@ -85,9 +171,32 @@ class SearchViewModel @Inject constructor(
                 SearchUIEvents.OnLoadMore -> {
                     loadMore()
                 }
+
+                is SearchUIEvents.OnSearchQuerySubmitted -> {
+                    handleSearch(event)
+                }
             }
         }
     }
+
+    private fun handleSearch(event: SearchUIEvents.OnSearchQuerySubmitted) {
+        viewModelScope.launch {
+            isSearchMode = event.query.isNotEmpty()
+            _uiState.emit(
+                Event(
+                    SearchUIStates(
+                        isPagingLoadingVisible = false,
+                        isInSearchMode = isSearchMode
+                    )
+                )
+            )
+            if (isSearchMode && lastSearchedQuery != event.query && event.query.length >= 3) {
+                lastSearchedQuery = event.query
+                fetchAllPokemonList(event.query)
+            }
+        }
+    }
+
 
     private fun loadMore() {
         if (isLoadingMore.getAndSet(true) || isLastPage.get()) return

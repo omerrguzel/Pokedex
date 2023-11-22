@@ -57,6 +57,11 @@ class PokemonAdapter(
         } else null
     }
 
+    fun clearList() {
+        pokemonList.clear()
+        submitList(pokemonList.toList())
+    }
+
     inner class PokemonViewHolder(private val binding: ItemPokemonBinding) :
         RecyclerView.ViewHolder(
             binding.root
