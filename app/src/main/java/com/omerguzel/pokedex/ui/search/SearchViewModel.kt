@@ -1,6 +1,5 @@
 package com.omerguzel.pokedex.ui.search
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.omerguzel.pokedex.data.remote.network.response.PokemonList
 import com.omerguzel.pokedex.domain.usecase.FetchPokemonDetailsUseCase
@@ -29,10 +28,20 @@ class SearchViewModel @Inject constructor(
     private var isLastPage = AtomicBoolean(false)
     private var offset = 0
     private var isSearchMode: Boolean = false
+    private var isSortedByNumber: Boolean = true
     private var lastSearchedQuery = ""
 
     private val _uiState = MutableStateFlow(Event(SearchUIStates()))
     val uiState = _uiState.asStateFlow()
+
+    private fun updateUIState(update: (currentState: SearchUIStates) -> SearchUIStates) {
+        val currentState = _uiState.value.peekContent() ?: SearchUIStates()
+        val newState = update(currentState)
+        viewModelScope.launch {
+            _uiState.emit(Event(newState))
+        }
+    }
+
 
     private val _pokemonListState =
         MutableStateFlow<Event<Resource<PokemonList?>?>>(Event(null))
@@ -51,16 +60,18 @@ class SearchViewModel @Inject constructor(
 
     private fun fetchPokemonList(limit: Int, offset: Int) {
         viewModelScope.launch {
-            _uiState.emit(Event(SearchUIStates(isPagingLoadingVisible = true)))
             fetchPokemonListUseCase(limit, offset).collect { resource ->
                 _pokemonListState.emit(Event(resource))
                 when (resource) {
                     is Resource.Error -> {
                         isLoadingMore.set(false)
                         isLastPage.set(false)
+                        updateUIState { it.copy(isPagingLoadingVisible = false, isSortedByNumber = isSortedByNumber) }
                     }
 
-                    is Resource.Loading -> Unit
+                    is Resource.Loading -> {
+                        updateUIState { it.copy(isPagingLoadingVisible = true, isSortedByNumber = isSortedByNumber) }
+                    }
                     is Resource.Success -> {
                         resource.data?.let {
                             fetchPokemonDetails(it)
@@ -100,38 +111,17 @@ class SearchViewModel @Inject constructor(
             fetchPokemonDetailsUseCase(pokemonList, filterQuery).collect { aggregatedResource ->
                 when (aggregatedResource) {
                     is AggregatedResource.Loading -> {
-                        _uiState.emit(
-                            Event(
-                                SearchUIStates(
-                                    isPagingLoadingVisible = true,
-                                    isInSearchMode = isSearchMode
-                                )
-                            )
-                        )
+                        updateUIState { it.copy(isPagingLoadingVisible = true, isSortedByNumber = isSortedByNumber) }
                         _pokemonDetailsState.emit(Event(PokemonListUIState.Loading))
                     }
 
                     is AggregatedResource.Error -> {
-                        _uiState.emit(
-                            Event(
-                                SearchUIStates(
-                                    isPagingLoadingVisible = false,
-                                    isInSearchMode = isSearchMode
-                                )
-                            )
-                        )
+                        updateUIState { it.copy(isPagingLoadingVisible = false, isSortedByNumber = isSortedByNumber) }
                         _pokemonDetailsState.emit(Event(PokemonListUIState.Error(aggregatedResource.message)))
                     }
 
                     is AggregatedResource.Success -> {
-                        _uiState.emit(
-                            Event(
-                                SearchUIStates(
-                                    isPagingLoadingVisible = false,
-                                    isInSearchMode = isSearchMode
-                                )
-                            )
-                        )
+                        updateUIState { it.copy(isPagingLoadingVisible = false, isSortedByNumber = isSortedByNumber) }
                         _pokemonDetailsState.emit(
                             Event(
                                 PokemonListUIState.Success(
@@ -139,18 +129,10 @@ class SearchViewModel @Inject constructor(
                                 )
                             )
                         )
-                        Log.d("mylog", "${aggregatedResource.data.results}")
                     }
 
                     is AggregatedResource.PartialSuccess -> {
-                        _uiState.emit(
-                            Event(
-                                SearchUIStates(
-                                    isPagingLoadingVisible = false,
-                                    isInSearchMode = isSearchMode
-                                )
-                            )
-                        )
+                        updateUIState { it.copy(isPagingLoadingVisible = false, isSortedByNumber = isSortedByNumber) }
                         _pokemonDetailsState.emit(
                             Event(
                                 PokemonListUIState.Success(
@@ -175,6 +157,10 @@ class SearchViewModel @Inject constructor(
                 is SearchUIEvents.OnSearchQuerySubmitted -> {
                     handleSearch(event)
                 }
+
+                is SearchUIEvents.OnSortTypeChanged -> {
+                    handleSorting(event)
+                }
             }
         }
     }
@@ -182,21 +168,26 @@ class SearchViewModel @Inject constructor(
     private fun handleSearch(event: SearchUIEvents.OnSearchQuerySubmitted) {
         viewModelScope.launch {
             isSearchMode = event.query.isNotEmpty()
-            _uiState.emit(
-                Event(
-                    SearchUIStates(
-                        isPagingLoadingVisible = false,
-                        isInSearchMode = isSearchMode
-                    )
-                )
-            )
             if (isSearchMode && lastSearchedQuery != event.query && event.query.length >= 3) {
                 lastSearchedQuery = event.query
                 fetchAllPokemonList(event.query)
             }
+            updateUIState { currentState ->
+                currentState.copy(
+                    isPagingLoadingVisible = false,
+                    isInSearchMode = isSearchMode,
+                    isSortedByNumber = isSortedByNumber
+                )
+            }
         }
     }
 
+    private fun handleSorting(event: SearchUIEvents.OnSortTypeChanged) {
+        isSortedByNumber = event.sortType == SortType.NUMBER
+        updateUIState { currentState ->
+            currentState.copy(isSortedByNumber = isSortedByNumber)
+        }
+    }
 
     private fun loadMore() {
         if (isLoadingMore.getAndSet(true) || isLastPage.get()) return

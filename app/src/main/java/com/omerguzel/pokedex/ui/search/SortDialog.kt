@@ -10,8 +10,8 @@ import com.omerguzel.pokedex.databinding.DialogSortOptionsBinding
 
 class SortDialog(
     private val context: Context,
-    val defaultOption : SortOption = SortOption.NUMBER,
-    val onSortOptionChanged: ((sortOption:SortOption) -> Unit)? = null,
+    val defaultOption : SortType = SortType.NUMBER,
+    val onSortOptionChanged: ((sortOption:SortType) -> Unit)? = null,
     val onDialogDismissed: (() -> Unit)? = null
 ) {
 
@@ -23,17 +23,17 @@ class SortDialog(
 
     init {
         with(binding) {
-            if (defaultOption == SortOption.NUMBER) sortByNumber.isChecked =true
+            if (defaultOption == SortType.NUMBER) sortByNumber.isChecked =true
             else sortByName.isChecked=true
             sortOptionsGroup.setOnCheckedChangeListener { _, checkedId ->
                 when (checkedId) {
                     sortByNumber.id -> {
-                        onSortOptionChanged?.invoke(SortOption.NUMBER)
+                        onSortOptionChanged?.invoke(SortType.NUMBER)
                         sortByName.isChecked=false
                     }
 
                     sortByName.id -> {
-                        onSortOptionChanged?.invoke(SortOption.NAME)
+                        onSortOptionChanged?.invoke(SortType.NAME)
                         sortByNumber.isChecked=false
                     }
                 }
@@ -66,6 +66,6 @@ class SortDialog(
     }
 }
 
-enum class SortOption{
+enum class SortType{
     NUMBER,NAME
 }

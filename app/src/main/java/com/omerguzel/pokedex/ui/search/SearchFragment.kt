@@ -14,6 +14,7 @@ import com.omerguzel.pokedex.ui.base.BaseFragment
 import com.omerguzel.pokedex.ui.base.StatusBarColorChanger
 import com.omerguzel.pokedex.ui.search.model.PokemonListUIState
 import com.omerguzel.pokedex.ui.search.model.SearchUIEvents
+import com.omerguzel.pokedex.ui.search.model.SearchUIStates
 import com.omerguzel.pokedex.util.collectLatestEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -28,7 +29,7 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
 
     private val viewModel by viewModels<SearchViewModel>()
 
-    private var currentSortOption: SortOption = SortOption.NUMBER
+    private var currentSortOption: SortType = SortType.NUMBER
 
     private val defaultAdapter: PokemonAdapter = PokemonAdapter()
     private val searchAdapter: PokemonAdapter = PokemonAdapter()
@@ -46,20 +47,20 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
         observeUIState()
     }
 
-    private fun initUI(){
+    private fun initUI() {
         binding.paginationProgressBar.initPagingLoadingBar(requireContext())
         statusBarColorChanger.changeStatusBarColor(R.color.primary)
         initSearch()
         initRVs()
     }
 
-    private fun initListeners(){
+    private fun initListeners() {
         binding.btnSort.setOnClickListener {
             val sortDialogView = SortDialog(
                 requireContext(),
                 defaultOption = currentSortOption,
                 onSortOptionChanged = {
-                    currentSortOption = it
+                    changeSortType(it)
                 }
             )
             sortDialogView.showDialog()
@@ -73,8 +74,8 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
         }
     }
 
-    private fun initRVs(){
-        with(binding){
+    private fun initRVs() {
+        with(binding) {
             rvPokemon.adapter = defaultAdapter
             rvSearchPokemon.adapter = searchAdapter
             rvPokemon.visibleOrGone(isInSearchMode.not())
@@ -99,10 +100,9 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
                 is PokemonListUIState.Loading -> Unit
                 is PokemonListUIState.Success -> {
                     state.data.results?.let {
-                        if(isInSearchMode.not()) {
-                            defaultAdapter.submitData(it)
-                        }
-                        else searchAdapter.submitList(it)
+                        if (isInSearchMode.not()) {
+                            defaultAdapter.appendData(it)
+                        } else searchAdapter.submitData(it)
                     }
                 }
             }
@@ -111,13 +111,28 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
 
     private fun observeUIState() {
         viewModel.uiState.collectLatestEvent(this@SearchFragment) { state ->
-            with(binding) {
-                paginationProgressBar.visibleOrGone(state.isPagingLoadingVisible)
-                isInSearchMode = state.isInSearchMode
-                rvPokemon.visibleOrGone(isInSearchMode.not())
-                rvSearchPokemon.visibleOrGone(isInSearchMode)
-            }
+            handleUIStateChange(state)
         }
+    }
+
+    private fun handleUIStateChange(state: SearchUIStates) {
+        with(binding) {
+            paginationProgressBar.visibleOrGone(state.isPagingLoadingVisible)
+            isInSearchMode = state.isInSearchMode
+            rvPokemon.visibleOrGone(!isInSearchMode)
+            rvSearchPokemon.visibleOrGone(isInSearchMode)
+            defaultAdapter.sortByType(state.isSortedByNumber)
+            searchAdapter.sortByType(state.isSortedByNumber)
+            currentSortOption = if (state.isSortedByNumber) SortType.NUMBER else SortType.NAME
+            val sortResId =
+                if (state.isSortedByNumber) R.drawable.ic_tag else R.drawable.ic_letter_sort
+            btnSort.setIconResource(sortResId)
+        }
+    }
+
+
+    private fun changeSortType(sortType: SortType) {
+        viewModel.handleUIEvents(SearchUIEvents.OnSortTypeChanged(sortType))
     }
 
     private fun initSearch() {

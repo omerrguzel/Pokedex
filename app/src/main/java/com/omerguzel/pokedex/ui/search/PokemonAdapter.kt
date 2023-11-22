@@ -13,9 +13,10 @@ import com.omerguzel.pokedex.extensions.showImage
 
 class PokemonAdapter(
     var itemSelectListener: ((pokemonUIItem: PokemonUIItem) -> Unit)? = null,
-    ) : ListAdapter<PokemonUIItem, PokemonAdapter.PokemonViewHolder>(DIFF_CALLBACK) {
+) : ListAdapter<PokemonUIItem, PokemonAdapter.PokemonViewHolder>(DIFF_CALLBACK) {
 
     private var pokemonList = mutableListOf<PokemonUIItem>()
+    private var isSortedByNumber : Boolean = true
 
     companion object {
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<PokemonUIItem>() {
@@ -33,8 +34,14 @@ class PokemonAdapter(
     }
 
     fun submitData(pokemonItems: List<PokemonUIItem>) {
+        pokemonList=pokemonItems.toMutableList()
+        sortByType(isSortedByNumber)
+    }
+
+    fun appendData(pokemonItems: List<PokemonUIItem>) {
         pokemonList.addAll(pokemonItems)
         pokemonList = pokemonList.distinct().toMutableList()
+        sortByType(isSortedByNumber)
         submitList(pokemonList.toList())
     }
 
@@ -51,16 +58,17 @@ class PokemonAdapter(
         holder.bind(pokemonItem)
     }
 
-    private fun getItemSafe(position: Int): PokemonUIItem? {
-        return if (position != RecyclerView.NO_POSITION) {
-            getItem(position)
-        } else null
-    }
-
-    fun clearList() {
-        pokemonList.clear()
+    fun sortByType(sortedByNumber: Boolean) {
+        isSortedByNumber = sortedByNumber
+        if (isSortedByNumber) {
+            pokemonList.sortBy { it.id }
+        } else {
+            pokemonList.sortBy { it.name }
+        }
         submitList(pokemonList.toList())
     }
+
+
 
     inner class PokemonViewHolder(private val binding: ItemPokemonBinding) :
         RecyclerView.ViewHolder(
@@ -68,11 +76,12 @@ class PokemonAdapter(
         ) {
 
         fun bind(pokemon: PokemonUIItem) {
-            with(binding){
-                textId.text= itemView.rootView.context.getString(R.string.pokemon_id,pokemon.id.toString())
-                textName.text=pokemon.name.capitalizeFirstLetter()
+            with(binding) {
+                textId.text =
+                    itemView.rootView.context.getString(R.string.pokemon_id, pokemon.id.toString())
+                textName.text = pokemon.name.capitalizeFirstLetter()
                 image.showImage(pokemon.image)
-                root.setOnClickListener{
+                root.setOnClickListener {
                     itemSelectListener?.invoke(pokemon)
                 }
             }

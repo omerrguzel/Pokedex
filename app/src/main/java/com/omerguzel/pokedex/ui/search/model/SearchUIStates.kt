@@ -1,6 +1,7 @@
 package com.omerguzel.pokedex.ui.search.model
 
-class SearchUIStates(
+data class SearchUIStates(
     val isPagingLoadingVisible : Boolean = true,
-    val isInSearchMode: Boolean = false
+    val isInSearchMode: Boolean = false,
+    val isSortedByNumber: Boolean = true
 )
