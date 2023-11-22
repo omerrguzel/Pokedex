@@ -5,11 +5,12 @@ import android.animation.ValueAnimator
 import android.content.res.Resources
 import android.os.Bundle
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import com.omerguzel.pokedex.R
 import com.omerguzel.pokedex.databinding.FragmentSearchBinding
 import com.omerguzel.pokedex.domain.model.PokemonUIItem
+import com.omerguzel.pokedex.extensions.drawable
+import com.omerguzel.pokedex.extensions.visibleOrGone
 import com.omerguzel.pokedex.ui.base.BaseFragment
 import com.omerguzel.pokedex.ui.base.StatusBarColorChanger
 import com.omerguzel.pokedex.ui.search.model.SearchUIEvents
@@ -65,8 +66,8 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
 
     private fun showLoading(isLoading: Boolean) {
         with(binding.paginationProgressBar){
-            visibility = if (isLoading) View.VISIBLE else View.GONE
-            val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.loading_bar)
+           visibleOrGone(isLoading)
+            val drawable = requireContext().drawable(R.drawable.loading_bar)
             val screenWidth = Resources.getSystem().displayMetrics.widthPixels
             drawable?.setBounds(0, 0, screenWidth * 2, height)
             indeterminateDrawable = drawable
