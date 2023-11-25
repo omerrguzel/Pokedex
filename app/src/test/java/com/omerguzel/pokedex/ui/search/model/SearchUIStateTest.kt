@@ -115,4 +115,30 @@ class SearchUIStateTest {
         //Then
         Truth.assertThat(actualResult).isEqualTo(expectedResult)
     }
+
+    @Test
+    fun `given isViewNoResultVisible, when isNoResultViewVisible called, then should return true`() {
+        // Given
+        val isViewNoResultVisible = true
+        val uiState= SearchUIState(isViewNoResultVisible=isViewNoResultVisible)
+
+        // When
+        val actualResult = uiState.isNoResultViewVisible()
+
+        // Then
+        Truth.assertThat(actualResult).isTrue()
+    }
+
+    @Test
+    fun `given is not isViewNoResultVisible, when isNoResultViewVisible called, then should return false`() {
+        // Given
+        val isViewNoResultVisible = false
+        val uiState= SearchUIState(isViewNoResultVisible=isViewNoResultVisible)
+
+        // When
+        val actualResult = uiState.isNoResultViewVisible()
+
+        // Then
+        Truth.assertThat(actualResult).isFalse()
+    }
 }

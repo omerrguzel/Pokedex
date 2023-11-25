@@ -6,7 +6,8 @@ import com.omerguzel.pokedex.ui.search.SortType
 data class SearchUIState(
     val isPagingLoadingVisible : Boolean = true,
     val isInSearchMode: Boolean = false,
-    val isSortedByNumber: Boolean = true
+    val isSortedByNumber: Boolean = true,
+    val isViewNoResultVisible : Boolean = false
 ){
 
     fun isPokemonRecyclerViewVisible() :Boolean{
@@ -22,5 +23,9 @@ data class SearchUIState(
 
     fun getCurrentSortOption() : SortType{
         return if (isSortedByNumber) SortType.NUMBER else SortType.NAME
+    }
+
+    fun isNoResultViewVisible() : Boolean{
+        return isViewNoResultVisible
     }
 }

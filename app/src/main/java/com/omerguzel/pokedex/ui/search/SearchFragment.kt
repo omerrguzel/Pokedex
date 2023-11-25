@@ -101,7 +101,6 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
                 is PokemonListUIState.Loading -> Unit
                 is PokemonListUIState.Success -> {
                     state.data.results?.let {
-                       // Log.d("mylog","Fragment observe ${state.data}")
                         defaultAdapter.appendData(it)
                     }
                 }
@@ -142,6 +141,7 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
             searchAdapter.sortByType(state.isSortedByNumber)
             currentSortOption = state.getCurrentSortOption()
             btnSort.setIconResource(state.getBtnSortIcon())
+            viewNoPokemon.root.visibleOrGone(state.isNoResultViewVisible())
         }
     }
 

@@ -72,23 +72,6 @@
             android:layout_height="match_parent">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvPokemon"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginHorizontal="12dp"
-                android:clipToPadding="false"
-                android:orientation="vertical"
-                android:paddingTop="18dp"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:spanCount="3"
-                tools:itemCount="20"
-                tools:listitem="@layout/item_pokemon" />
-
-            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvSearchPokemon"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -105,6 +88,32 @@
                 app:spanCount="3"
                 tools:itemCount="20"
                 tools:listitem="@layout/item_pokemon" />
+
+            <include
+                android:id="@+id/viewNoPokemon"
+                layout="@layout/view_no_result"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="40dp"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPokemon"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginHorizontal="12dp"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                android:paddingTop="18dp"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:spanCount="3"
+                tools:itemCount="20"
+                tools:listitem="@layout/item_pokemon"
+                tools:visibility="gone" />
 
             <View
                 android:layout_width="match_parent"
