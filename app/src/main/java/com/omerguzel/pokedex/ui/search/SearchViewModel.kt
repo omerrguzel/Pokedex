@@ -1,6 +1,5 @@
 package com.omerguzel.pokedex.ui.search
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.omerguzel.pokedex.data.remote.network.response.PokemonList
 import com.omerguzel.pokedex.domain.usecase.FetchPokemonDetailsUseCase
@@ -8,7 +7,7 @@ import com.omerguzel.pokedex.domain.usecase.FetchPokemonListUseCase
 import com.omerguzel.pokedex.ui.base.BaseViewModel
 import com.omerguzel.pokedex.ui.search.model.PokemonListUIState
 import com.omerguzel.pokedex.ui.search.model.SearchUIEvents
-import com.omerguzel.pokedex.ui.search.model.SearchUIStates
+import com.omerguzel.pokedex.ui.search.model.SearchUIState
 import com.omerguzel.pokedex.util.AggregatedResource
 import com.omerguzel.pokedex.util.Event
 import com.omerguzel.pokedex.util.Resource
@@ -32,7 +31,7 @@ class SearchViewModel @Inject constructor(
     private var isSortedByNumber: Boolean = true
     private var lastSearchedQuery = ""
 
-    private val _uiState = MutableStateFlow(Event(SearchUIStates()))
+    private val _uiState = MutableStateFlow(Event(SearchUIState()))
     val uiState = _uiState.asStateFlow()
 
 
@@ -54,7 +53,7 @@ class SearchViewModel @Inject constructor(
         fetchPokemonList(18, 0)
     }
 
-    private fun updateUIState(update: (currentState: SearchUIStates) -> SearchUIStates) {
+    private fun updateUIState(update: (currentState: SearchUIState) -> SearchUIState) {
         val currentState = _uiState.value.peekContent()
         val newState = update(currentState)
         viewModelScope.launch {
@@ -62,7 +61,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun fetchPokemonList(limit: Int, offset: Int) {
+    fun fetchPokemonList(limit: Int, offset: Int) {
         viewModelScope.launch {
             fetchPokemonListUseCase(limit, offset).collect { resource ->
                 _pokemonListState.emit(Event(resource))
@@ -126,8 +125,8 @@ class SearchViewModel @Inject constructor(
 
                     is AggregatedResource.Success -> {
                         updateUIState { it.copy(isPagingLoadingVisible = false, isSortedByNumber = isSortedByNumber) }
-                        Log.d("mylog","VM emit ${aggregatedResource.data}")
-                        Log.d("mylog","VM decide ${decideListState()}")
+                        //Log.d("mylog","VM emit ${aggregatedResource.data}")
+                       // Log.d("mylog","VM decide ${decideListState()}")
                         decideListState().emit(
                             Event(
                                 PokemonListUIState.Success(

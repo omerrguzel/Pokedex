@@ -3,7 +3,7 @@ package com.omerguzel.pokedex.ui.search.model
 import com.omerguzel.pokedex.R
 import com.omerguzel.pokedex.ui.search.SortType
 
-data class SearchUIStates(
+data class SearchUIState(
     val isPagingLoadingVisible : Boolean = true,
     val isInSearchMode: Boolean = false,
     val isSortedByNumber: Boolean = true

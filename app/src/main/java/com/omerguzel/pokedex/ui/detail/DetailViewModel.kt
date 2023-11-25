@@ -1,6 +1,5 @@
 package com.omerguzel.pokedex.ui.detail
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.omerguzel.pokedex.data.remote.network.response.Species
@@ -34,7 +33,7 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    private fun fetchPokemonDescription(url: String) {
+    fun fetchPokemonDescription(url: String) {
         viewModelScope.launch {
             fetchPokemonDescriptionUseCase(url).collect { resource ->
                 _pokemonDescriptionState.emit(Event(resource))
@@ -48,7 +47,6 @@ class DetailViewModel @Inject constructor(
                     }
 
                     is Resource.Success -> {
-                        Log.d("mylog","DescVM ${resource.data?.descriptionEntries?.get(0)?.text}")
                         _pokemonDescriptionState.emit(
                             Event(resource)
                         )
@@ -59,6 +57,6 @@ class DetailViewModel @Inject constructor(
     }
 
     companion object {
-        private const val ARG_DETAIL_POKEMON_ITEM = "pokemonItem"
+         const val ARG_DETAIL_POKEMON_ITEM = "pokemonItem"
     }
 }

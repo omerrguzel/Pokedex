@@ -1,7 +1,6 @@
 package com.omerguzel.pokedex.ui.search
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
@@ -15,7 +14,7 @@ import com.omerguzel.pokedex.ui.base.BaseFragment
 import com.omerguzel.pokedex.ui.base.StatusBarColorChanger
 import com.omerguzel.pokedex.ui.search.model.PokemonListUIState
 import com.omerguzel.pokedex.ui.search.model.SearchUIEvents
-import com.omerguzel.pokedex.ui.search.model.SearchUIStates
+import com.omerguzel.pokedex.ui.search.model.SearchUIState
 import com.omerguzel.pokedex.util.collectLatestEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -102,7 +101,7 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
                 is PokemonListUIState.Loading -> Unit
                 is PokemonListUIState.Success -> {
                     state.data.results?.let {
-                        Log.d("mylog","Fragment observe ${state.data}")
+                       // Log.d("mylog","Fragment observe ${state.data}")
                         defaultAdapter.appendData(it)
                     }
                 }
@@ -133,7 +132,7 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
         }
     }
 
-    private fun handleUIStateChange(state: SearchUIStates) {
+    private fun handleUIStateChange(state: SearchUIState) {
         with(binding) {
             paginationProgressBar.visibleOrGone(state.isPagingLoadingVisible)
             isInSearchMode = state.isInSearchMode

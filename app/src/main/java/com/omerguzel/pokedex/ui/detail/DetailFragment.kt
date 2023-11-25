@@ -1,7 +1,6 @@
 package com.omerguzel.pokedex.ui.detail
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
@@ -47,7 +46,7 @@ class DetailFragment : BaseFragment(R.layout.fragment_detail) {
             rvStats.adapter = statAdapter
             typeAdapter.submitList(pokemon.types)
             statAdapter.submitList(pokemon.stats)
-            Log.d("mylog", "Pokemon $pokemon")
+            //Log.d("mylog", "Pokemon $pokemon")
             textTitle.text = pokemon.name.capitalizeFirstLetter()
             textId.text = getString(R.string.pokemon_id, pokemon.id.toString())
             imagePokemon.showImage(args.pokemonItem.image)
