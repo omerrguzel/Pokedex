@@ -1,6 +1,5 @@
 package com.omerguzel.pokedex.data.remote.network.common
 
-import androidx.annotation.Keep
 import okhttp3.Headers
 import okhttp3.Request
 import okio.Timeout
@@ -16,18 +15,6 @@ sealed class NetworkResult<out T> {
     data class Success<T>(val response: T?, val headers: Headers? = null) : NetworkResult<T>()
     data class Failure<T>(val error: ServiceError, val response: T?) : NetworkResult<T>()
 }
-
-class CompositeException(private val serviceErrors: List<ServiceError>) : Throwable() {
-    fun deduceRepresentativeError(): ServiceError {
-        val distinctCodes = serviceErrors.mapNotNull { it.code }.distinct()
-        return if (distinctCodes.size == 1) {
-            serviceErrors.first()
-        } else {
-            ServiceError.Default(BaseServiceError.UNKNOWN, "Multiple errors occurred")
-        }
-    }
-}
-
 
 abstract class CallDelegate<TIn, TOut>(
     protected val proxy: Call<TIn>

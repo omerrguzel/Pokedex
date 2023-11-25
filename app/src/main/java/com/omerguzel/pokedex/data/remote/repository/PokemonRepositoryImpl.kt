@@ -20,6 +20,4 @@ class PokemonRepositoryImpl(
     override suspend fun fetchPokemonDescription(url: String): NetworkResult<Species> {
         return pokeApi.fetchPokemonDescription(url = url)
     }
-
-
 }

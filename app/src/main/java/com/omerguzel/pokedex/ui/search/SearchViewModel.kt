@@ -34,14 +34,6 @@ class SearchViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(Event(SearchUIStates()))
     val uiState = _uiState.asStateFlow()
 
-    private fun updateUIState(update: (currentState: SearchUIStates) -> SearchUIStates) {
-        val currentState = _uiState.value.peekContent() ?: SearchUIStates()
-        val newState = update(currentState)
-        viewModelScope.launch {
-            _uiState.emit(Event(newState))
-        }
-    }
-
 
     private val _pokemonListState =
         MutableStateFlow<Event<Resource<PokemonList?>?>>(Event(null))
@@ -56,6 +48,14 @@ class SearchViewModel @Inject constructor(
 
     init {
         fetchPokemonList(18, 0)
+    }
+
+    private fun updateUIState(update: (currentState: SearchUIStates) -> SearchUIStates) {
+        val currentState = _uiState.value.peekContent() ?: SearchUIStates()
+        val newState = update(currentState)
+        viewModelScope.launch {
+            _uiState.emit(Event(newState))
+        }
     }
 
     private fun fetchPokemonList(limit: Int, offset: Int) {
