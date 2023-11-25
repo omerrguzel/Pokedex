@@ -1,5 +1,6 @@
 package com.omerguzel.pokedex.ui.search
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.omerguzel.pokedex.data.remote.network.response.PokemonList
 import com.omerguzel.pokedex.domain.usecase.FetchPokemonDetailsUseCase
@@ -46,12 +47,15 @@ class SearchViewModel @Inject constructor(
     private val _pokemonDetailsState = MutableStateFlow<Event<PokemonListUIState?>>(Event(null))
     val pokemonDetailsState = _pokemonDetailsState.asStateFlow()
 
+    private val _pokemonSearchDetailsState = MutableStateFlow<Event<PokemonListUIState?>>(Event(null))
+    val pokemonSearchDetailsState = _pokemonSearchDetailsState.asStateFlow()
+
     init {
         fetchPokemonList(18, 0)
     }
 
     private fun updateUIState(update: (currentState: SearchUIStates) -> SearchUIStates) {
-        val currentState = _uiState.value.peekContent() ?: SearchUIStates()
+        val currentState = _uiState.value.peekContent()
         val newState = update(currentState)
         viewModelScope.launch {
             _uiState.emit(Event(newState))
@@ -112,17 +116,19 @@ class SearchViewModel @Inject constructor(
                 when (aggregatedResource) {
                     is AggregatedResource.Loading -> {
                         updateUIState { it.copy(isPagingLoadingVisible = true, isSortedByNumber = isSortedByNumber) }
-                        _pokemonDetailsState.emit(Event(PokemonListUIState.Loading))
+                        decideListState().emit(Event(PokemonListUIState.Loading))
                     }
 
                     is AggregatedResource.Error -> {
                         updateUIState { it.copy(isPagingLoadingVisible = false, isSortedByNumber = isSortedByNumber) }
-                        _pokemonDetailsState.emit(Event(PokemonListUIState.Error(aggregatedResource.message)))
+                        decideListState().emit(Event(PokemonListUIState.Error(aggregatedResource.message)))
                     }
 
                     is AggregatedResource.Success -> {
                         updateUIState { it.copy(isPagingLoadingVisible = false, isSortedByNumber = isSortedByNumber) }
-                        _pokemonDetailsState.emit(
+                        Log.d("mylog","VM emit ${aggregatedResource.data}")
+                        Log.d("mylog","VM decide ${decideListState()}")
+                        decideListState().emit(
                             Event(
                                 PokemonListUIState.Success(
                                     aggregatedResource.data
@@ -133,7 +139,7 @@ class SearchViewModel @Inject constructor(
 
                     is AggregatedResource.PartialSuccess -> {
                         updateUIState { it.copy(isPagingLoadingVisible = false, isSortedByNumber = isSortedByNumber) }
-                        _pokemonDetailsState.emit(
+                        decideListState().emit(
                             Event(
                                 PokemonListUIState.Success(
                                     aggregatedResource.data
@@ -146,6 +152,11 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    private fun decideListState():MutableStateFlow<Event<PokemonListUIState?>>{
+        return if(isSearchMode){
+            _pokemonSearchDetailsState
+        } else _pokemonDetailsState
+    }
 
     fun handleUIEvents(event: SearchUIEvents<Any>) {
         viewModelScope.launch {

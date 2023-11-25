@@ -1,6 +1,7 @@
 package com.omerguzel.pokedex.ui.search
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
@@ -44,6 +45,7 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
         initUI()
         initListeners()
         observePokemonList()
+        observeSearchPokemonList()
         observeUIState()
     }
 
@@ -100,9 +102,25 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
                 is PokemonListUIState.Loading -> Unit
                 is PokemonListUIState.Success -> {
                     state.data.results?.let {
-                        if (isInSearchMode.not()) {
-                            defaultAdapter.appendData(it)
-                        } else searchAdapter.submitData(it)
+                        Log.d("mylog","Fragment observe ${state.data}")
+                        defaultAdapter.appendData(it)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeSearchPokemonList() {
+        viewModel.pokemonSearchDetailsState.collectLatestEvent(this@SearchFragment) { state ->
+            when (state) {
+                is PokemonListUIState.Error -> {
+                    //TODO
+                }
+
+                is PokemonListUIState.Loading -> Unit
+                is PokemonListUIState.Success -> {
+                    state.data.results?.let {
+                        searchAdapter.submitData(it)
                     }
                 }
             }
@@ -119,14 +137,12 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
         with(binding) {
             paginationProgressBar.visibleOrGone(state.isPagingLoadingVisible)
             isInSearchMode = state.isInSearchMode
-            rvPokemon.visibleOrGone(!isInSearchMode)
-            rvSearchPokemon.visibleOrGone(isInSearchMode)
+            rvPokemon.visibleOrGone(state.isPokemonRecyclerViewVisible())
+            rvSearchPokemon.visibleOrGone(state.isSearchRecyclerViewVisible())
             defaultAdapter.sortByType(state.isSortedByNumber)
             searchAdapter.sortByType(state.isSortedByNumber)
-            currentSortOption = if (state.isSortedByNumber) SortType.NUMBER else SortType.NAME
-            val sortResId =
-                if (state.isSortedByNumber) R.drawable.ic_tag else R.drawable.ic_letter_sort
-            btnSort.setIconResource(sortResId)
+            currentSortOption = state.getCurrentSortOption()
+            btnSort.setIconResource(state.getBtnSortIcon())
         }
     }
 
