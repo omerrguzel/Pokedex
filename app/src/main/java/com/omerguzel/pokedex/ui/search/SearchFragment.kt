@@ -94,10 +94,7 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
     private fun observePokemonList() {
         viewModel.pokemonDetailsState.collectLatestEvent(this@SearchFragment) { state ->
             when (state) {
-                is PokemonListUIState.Error -> {
-                    //TODO
-                }
-
+                is PokemonListUIState.Error -> Unit
                 is PokemonListUIState.Loading -> Unit
                 is PokemonListUIState.Success -> {
                     state.data.results?.let {
@@ -111,10 +108,7 @@ class SearchFragment : BaseFragment(R.layout.fragment_search) {
     private fun observeSearchPokemonList() {
         viewModel.pokemonSearchDetailsState.collectLatestEvent(this@SearchFragment) { state ->
             when (state) {
-                is PokemonListUIState.Error -> {
-                    //TODO
-                }
-
+                is PokemonListUIState.Error -> Unit
                 is PokemonListUIState.Loading -> Unit
                 is PokemonListUIState.Success -> {
                     state.data.results?.let {
