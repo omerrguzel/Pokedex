@@ -1,12 +1,13 @@
 package com.omerguzel.pokedex.ui.detail
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.omerguzel.pokedex.data.remote.network.response.Species
 import com.omerguzel.pokedex.domain.model.PokemonUIItem
 import com.omerguzel.pokedex.domain.usecase.FetchPokemonDescriptionUseCase
 import com.omerguzel.pokedex.extensions.getOrThrow
-import com.omerguzel.pokedex.ui.base.BaseViewModel
 import com.omerguzel.pokedex.util.Event
 import com.omerguzel.pokedex.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,7 @@ import javax.inject.Inject
 class DetailViewModel @Inject constructor(
     private val fetchPokemonDescriptionUseCase: FetchPokemonDescriptionUseCase,
     savedStateHandle: SavedStateHandle
-) : BaseViewModel() {
+) : ViewModel() {
 
     private val selectedPokemonItem =
         savedStateHandle.getOrThrow<PokemonUIItem>(ARG_DETAIL_POKEMON_ITEM)
@@ -39,7 +40,7 @@ class DetailViewModel @Inject constructor(
                 _pokemonDescriptionState.emit(Event(resource))
                 when (resource) {
                     is Resource.Error -> {
-                        //TODO
+                        Log.e("Pokedex","Error occured : ${resource.message}")
                     }
 
                     is Resource.Loading -> {

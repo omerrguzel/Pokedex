@@ -1,11 +1,12 @@
 package com.omerguzel.pokedex.ui.search
 
+import android.util.Log
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.omerguzel.pokedex.data.remote.network.response.PokemonList
 import com.omerguzel.pokedex.domain.model.PokemonUIItem
 import com.omerguzel.pokedex.domain.usecase.FetchPokemonDetailsUseCase
 import com.omerguzel.pokedex.domain.usecase.FetchPokemonListUseCase
-import com.omerguzel.pokedex.ui.base.BaseViewModel
 import com.omerguzel.pokedex.ui.search.model.PokemonListUIState
 import com.omerguzel.pokedex.ui.search.model.SearchUIEvents
 import com.omerguzel.pokedex.ui.search.model.SearchUIState
@@ -23,7 +24,7 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     private val fetchPokemonListUseCase: FetchPokemonListUseCase,
     private val fetchPokemonDetailsUseCase: FetchPokemonDetailsUseCase
-) : BaseViewModel() {
+) : ViewModel() {
 
     private var isLoadingMore = AtomicBoolean(false)
     private var isLastPage = AtomicBoolean(false)
@@ -108,7 +109,7 @@ class SearchViewModel @Inject constructor(
                 _pokemonSearchListState.emit(Event(resource))
                 when (resource) {
                     is Resource.Error -> {
-                        //TODO
+                        Log.e("Pokedex","Couldn't fetch pokemon list : ${resource.message}")
                     }
 
                     is Resource.Loading -> Unit
@@ -243,7 +244,7 @@ class SearchViewModel @Inject constructor(
 
     private fun loadMore() {
         if (isLoadingMore.getAndSet(true) || isLastPage.get()) return
-        offset += 9
+        offset += 15
         fetchPokemonList(18, offset)
     }
 }
