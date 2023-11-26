@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">  
-The Pokédex Android app, developed for a [Pazarama](https://www.pazarama.com/) and [Coderspace](https://coderspace.io/) bootcamp, incorporates essential technologies like AndroidX, Hilt, Coroutines, Retrofit, and Glide, ensuring a robust and efficient user experience.
+The Pokédex Android app, developed for a <a href="https://www.pazarama.com/">Pazarama</a> and <a href="https://coderspace.io/">Coderspace</a> bootcamp, incorporates essential technologies like AndroidX, Hilt, Coroutines, Retrofit, and Glide, ensuring a robust and efficient user experience.
 </p>
 </br>
 
