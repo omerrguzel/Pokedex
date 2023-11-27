@@ -64,7 +64,6 @@ The Pokédex Android app, developed for a <a href="https://www.pazarama.com/">Pa
 - **Data Layer**: 
   - Communicates with the PokéApi REST API via Retrofit.
   - Handles API requests and responses.
-  - Uses a Repository to manage data source access logic.
 
 - **Domain Layer**:
   - Contains UseCases that execute business logic.
